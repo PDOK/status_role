@@ -1,0 +1,47 @@
+---
+- name: Map objects
+  set_fact:
+    status_objects: "{{ status_objects | community.general.json_query('[].{ apiVersion: apiVersion, kind: kind, name: metadata.name }') }}"
+
+- name: Filter Deployment
+  set_fact:
+    deployment: "{{ status_objects | community.general.json_query(query) }}"
+  vars:
+    query: "[?kind=='Deployment'] | [0]"
+
+- name: Get Deployment
+  k8s_info:
+    api_version: "{{ deployment.apiVersion }}"
+    kind: "{{ deployment.kind }}"
+    name: "{{ deployment.name }}"
+    namespace: "{{ ansible_operator_meta.namespace }}"
+  register: result
+
+- name: Set Deployment
+  set_fact:
+    deployment: "{{ result.resources[0] }}"
+
+- name: Deployment is Ready
+  set_fact:
+    deployment_status: "Ready"
+  when: deployment.status.readyReplicas is defined and deployment.status.replicas == deployment.status.readyReplicas
+
+- name: Deployment is Progressing
+  set_fact:
+    deployment_status: "Progressing"
+  when: deployment.status.readyReplicas is defined and deployment.status.replicas > deployment.status.readyReplicas
+
+- name: Deployment is Created
+  set_fact:
+    deployment_status: "Created"
+  when: deployment.status.readyReplicas is undefined
+
+- name: Status
+  operator_sdk.util.k8s_status:
+    api_version: "{{ resource.apiVersion }}"
+    kind: "{{ resource.kind }}"
+    name: "{{ resource.metadata.name }}"
+    namespace: "{{ resource.metadata.namespace }}"
+    status:
+      resources: "{{ status_objects }}"
+      deployment: "{{ deployment_status }}"
