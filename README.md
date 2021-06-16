@@ -15,12 +15,16 @@ This requires:
 
 This role uses the operator_sdk.util.k8s_status module
 This requires:
-- operator_sdk.util collection
+
+Ansibile collection:
+- operator_sdk.util
 
 This role uses the community.general.json_query filter
 This requires:
-- community.general collection
-- jmespath
+- Ansibile collection:
+  - community.general
+- Python Library:
+  - jmespath
 
 ## Role Variables
 
