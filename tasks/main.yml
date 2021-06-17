@@ -20,6 +20,7 @@
 - name: Set Deployment
   set_fact:
     deployment_info: "{{ result.resources[0] }}"
+  when: result.resources | length != 0
 
 - name: Deployment is Ready
   set_fact:
