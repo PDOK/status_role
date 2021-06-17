@@ -24,12 +24,12 @@
 - name: Deployment is Ready
   set_fact:
     deployment_status: "Ready"
-  when: deployment_info.status.readyReplicas is defined and deployment.status.replicas == deployment.status.readyReplicas
+  when: deployment_info.status.readyReplicas is defined and deployment_info.status.replicas == deployment_info.status.readyReplicas
 
 - name: Deployment is Progressing
   set_fact:
     deployment_status: "Progressing"
-  when: deployment_info.status.readyReplicas is defined and deployment.status.replicas > deployment.status.readyReplicas
+  when: deployment_info.status.readyReplicas is defined and deployment_info.status.replicas > deployment_info.status.readyReplicas
 
 - name: Deployment is Created
   set_fact:
