@@ -1,11 +1,11 @@
 ---
 - name: Map objects
   set_fact:
-    status_objects: "{{ status_objects | community.general.json_query('[].{ apiVersion: apiVersion, kind: kind, name: metadata.name }') }}"
+    mapped_objects: "{{ status_objects | community.general.json_query('[].{ apiVersion: apiVersion, kind: kind, name: metadata.name }') }}"
 
 - name: Filter Deployment
   set_fact:
-    filtered_deployment: "{{ status_objects | community.general.json_query(query) }}"
+    filtered_deployment: "{{ mapped_objects | community.general.json_query(query) }}"
   vars:
     query: "[?kind=='Deployment'] | [0]"
 
@@ -43,5 +43,5 @@
     name: "{{ resource.metadata.name }}"
     namespace: "{{ resource.metadata.namespace }}"
     status:
-      resources: "{{ status_objects }}"
+      resources: "{{ mapped_objects }}"
       deployment: "{{ deployment_status }}"
