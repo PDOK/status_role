@@ -5,36 +5,36 @@
 
 - name: Filter Deployment
   set_fact:
-    deployment: "{{ status_objects | community.general.json_query(query) }}"
+    filtered_deployment: "{{ status_objects | community.general.json_query(query) }}"
   vars:
     query: "[?kind=='Deployment'] | [0]"
 
 - name: Get Deployment
   k8s_info:
-    api_version: "{{ deployment.apiVersion }}"
-    kind: "{{ deployment.kind }}"
-    name: "{{ deployment.name }}"
+    api_version: "{{ filtered_deployment.apiVersion }}"
+    kind: "{{ filtered_deployment.kind }}"
+    name: "{{ filtered_deployment.name }}"
     namespace: "{{ ansible_operator_meta.namespace }}"
   register: result
 
 - name: Set Deployment
   set_fact:
-    deployment: "{{ result.resources[0] }}"
+    deployment_info: "{{ result.resources[0] }}"
 
 - name: Deployment is Ready
   set_fact:
     deployment_status: "Ready"
-  when: deployment.status.readyReplicas is defined and deployment.status.replicas == deployment.status.readyReplicas
+  when: deployment_info.status.readyReplicas is defined and deployment.status.replicas == deployment.status.readyReplicas
 
 - name: Deployment is Progressing
   set_fact:
     deployment_status: "Progressing"
-  when: deployment.status.readyReplicas is defined and deployment.status.replicas > deployment.status.readyReplicas
+  when: deployment_info.status.readyReplicas is defined and deployment.status.replicas > deployment.status.readyReplicas
 
 - name: Deployment is Created
   set_fact:
     deployment_status: "Created"
-  when: deployment.status.readyReplicas is undefined
+  when: deployment_info.status.readyReplicas is undefined
 
 - name: Status
   operator_sdk.util.k8s_status:
